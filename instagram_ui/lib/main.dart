@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instagram_ui/bloc/explore/explore_bloc.dart';
 import 'package:instagram_ui/bloc/home/home_bloc.dart';
 import 'package:instagram_ui/di/di.dart';
 import 'package:instagram_ui/screens/addpost_screen.dart';
@@ -99,7 +100,10 @@ class _MyAppState extends State<MyApp> {
         create: (context) => HomeBloc(),
         child: const HomeScreen(),
       ),
-      const ExploreScreen(),
+      BlocProvider(
+        create: (context) => ExploreBloc(),
+        child: const ExploreScreen(),
+      ),
       const AddPostScreen(),
       const NotificationScreen(),
       const ProfileScreen(),
