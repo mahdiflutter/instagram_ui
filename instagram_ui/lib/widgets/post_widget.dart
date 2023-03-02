@@ -13,7 +13,6 @@ class Post extends StatefulWidget {
 class _PostState extends State<Post> {
   @override
   Widget build(BuildContext context) {
-    print(widget.post!.postimage);
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Column(
