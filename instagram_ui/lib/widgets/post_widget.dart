@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:instagram_ui/model/post_model.dart';
+import 'package:instagram_ui/widgets/cachedimage_widget.dart';
 
 class Post extends StatefulWidget {
-  const Post({super.key});
+  const Post({super.key, required this.post});
+  final PostModel? post;
 
   @override
   State<Post> createState() => _PostState();
@@ -10,6 +13,7 @@ class Post extends StatefulWidget {
 class _PostState extends State<Post> {
   @override
   Widget build(BuildContext context) {
+    print(widget.post!.postimage);
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Column(
@@ -19,25 +23,33 @@ class _PostState extends State<Post> {
               const SizedBox(
                 width: 15,
               ),
-              Image.asset(
-                'assets/images/profile.png',
+            
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: CachedImage(
+                    imgUrl: widget.post!.userprofile!,
+                  ),
+                ),
               ),
               const SizedBox(
                 width: 10,
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text(
-                    'mahdi_flutter',
-                    style: TextStyle(
+                    '${widget.post!.username}',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
                   Text(
-                    'Tokyo , Japan',
-                    style: TextStyle(
+                    '${widget.post!.location}',
+                    style: const TextStyle(
                       fontSize: 13,
                     ),
                   ),
@@ -55,8 +67,12 @@ class _PostState extends State<Post> {
           const SizedBox(
             height: 15,
           ),
-          Image.asset(
-            'assets/images/post.png',
+          SizedBox(
+            width: double.infinity,
+            height: 370,
+            child: CachedImage(
+              imgUrl: widget.post!.postimage,
+            ),
           ),
           const SizedBox(
             height: 15,
@@ -121,18 +137,17 @@ class _PostState extends State<Post> {
           const SizedBox(
             height: 15,
           ),
-          Wrap(
-            children: const [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                child: Text(
-                  'mahdi_flutter The game in Japan was amazing and I want to share some photos',
-                  style: TextStyle(
-                    height: 1.5,
-                  ),
-                ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Text(
+              '${widget.post!.username} : ${widget.post!.description}',
+              maxLines: 2,
+              textAlign:TextAlign.left,
+              
+              style:const TextStyle(
+                height: 1.5,
               ),
-            ],
+            ),
           ),
         ],
       ),
