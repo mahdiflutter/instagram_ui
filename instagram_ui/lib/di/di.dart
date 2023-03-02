@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:instagram_ui/data/datasource/explore_datasource.dart';
 import 'package:instagram_ui/data/datasource/posts_datasource.dart';
 import 'package:instagram_ui/data/datasource/users_datasource.dart';
+import 'package:instagram_ui/data/repository/explore_repository.dart';
 import 'package:instagram_ui/data/repository/posts_repository.dart';
 import 'package:instagram_ui/data/repository/users_repository.dart';
 
@@ -20,6 +22,9 @@ Future<void> initioalGetIt() async {
   locator.registerFactory<IPostsDataSource>(
     () => PostsDataSource(),
   );
+  locator.registerFactory<IExploreDataSource>(
+    () => ExploreDataSource(),
+  );
 
   //repository
   locator.registerFactory<IUsersRepository>(
@@ -27,5 +32,8 @@ Future<void> initioalGetIt() async {
   );
   locator.registerFactory<IPostsRepository>(
     () => PostRepository(),
+  );
+  locator.registerFactory<IExploreRepository>(
+    () => ExploreRepository(),
   );
 }
