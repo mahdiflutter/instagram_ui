@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:instagram_ui/bloc/profile/profile_bloc.dart';
+import 'package:instagram_ui/bloc/profile/profile_event.dart';
+import 'package:instagram_ui/bloc/profile/profile_state.dart';
 import 'package:instagram_ui/constants/maincolor.dart';
+import 'package:instagram_ui/model/image_model.dart';
+import 'package:instagram_ui/model/profile_model.dart';
+import 'package:instagram_ui/widgets/cachedimage_widget.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,75 +18,96 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
+  void initState() {
+    BlocProvider.of<ProfileBloc>(context).add(
+      ProfileGetDataEvent(),
+    );
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            UserProfile(),
-            SliverPadding(
-              padding: const EdgeInsets.only(
-                top: 0,
-                bottom: 0,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/icons/userposts.png',
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Container(
-                            height: 2,
-                            color: Colors.black,
-                          )
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/icons/usertag.png',
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+      body: SafeArea(child: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, state) {
+          return CustomScrollView(
+            slivers: [
+              if (state is ProfileLodingState) ...[
+                const SliverToBoxAdapter(
+                  child: SpinKitRing(
+                    color: Colors.black,
+                    size: 30.0,
+                    lineWidth: 3,
+                  ),
+                )
+              ],
+              if (state is ProfileSuccessResponseState) ...[
+                state.profileInformation!.fold(
+                  (profileError) {
+                    return SliverToBoxAdapter(
+                      child: Text(profileError),
+                    );
+                  },
+                  (profileResponse) {
+                    return UserProfile(
+                      profile: profileResponse,
+                    );
+                  },
                 ),
-              ),
-            ),
-            SliverGrid.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 1,
-                mainAxisSpacing: 1,
-              ),
-              itemBuilder: (context, index) {
-                return Image.asset('assets/images/post.png');
-              },
-            )
-          ],
-        ),
+                state.userPosts!.fold(
+                  (postsError) {
+                    return SliverToBoxAdapter(
+                      child: Text(postsError),
+                    );
+                  },
+                  (postsResponse) {
+                    return UserPosts(
+                      list: postsResponse,
+                    );
+                  },
+                )
+              ],
+            ],
+          );
+        },
+      )),
+    );
+  }
+}
+
+class UserPosts extends StatelessWidget {
+  final List<ImageModel>? list;
+  const UserPosts({
+    super.key,
+    required this.list,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    
+    return SliverGrid.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 1,
+        mainAxisSpacing: 1,
+
       ),
+      itemBuilder: (context, index) {
+
+        return CachedImage(imgUrl:list![index].imageUrl);
+      
+      },
+    itemCount: list!.length,
     );
   }
 }
 
 class UserProfile extends StatelessWidget {
+  final ProfileModel? profile;
   const UserProfile({
     super.key,
+    required this.profile,
   });
 
   @override
@@ -102,9 +131,9 @@ class UserProfile extends StatelessWidget {
                 const SizedBox(
                   width: 10,
                 ),
-                const Text(
-                  'mahdi_flutter',
-                  style: TextStyle(
+                Text(
+                  '${profile!.userName}',
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                   ),
@@ -120,11 +149,12 @@ class UserProfile extends StatelessWidget {
             ),
             Row(
               children: [
-                Image.asset(
-                  'assets/images/profile.png',
+                SizedBox(
                   width: 65,
                   height: 65,
-                  fit: BoxFit.cover,
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(32),
+                      child: CachedImage(imgUrl: profile!.userProfileUrl)),
                 ),
                 const SizedBox(
                   width: 25,
@@ -132,15 +162,15 @@ class UserProfile extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
-                      "54",
-                      style: TextStyle(
+                      "${profile!.userPosts}",
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
                     ),
-                    Text(
+                    const Text(
                       "Posts",
                       style: TextStyle(
                         fontWeight: FontWeight.normal,
@@ -153,15 +183,15 @@ class UserProfile extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
-                      "834",
-                      style: TextStyle(
+                      "${profile!.userFollowers}",
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
                     ),
-                    Text(
+                    const Text(
                       "Followers",
                       style: TextStyle(
                         fontWeight: FontWeight.normal,
@@ -174,15 +204,15 @@ class UserProfile extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
-                      "162",
-                      style: TextStyle(
+                      "${profile!.userFollowing}",
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
                     ),
-                    Text(
+                    const Text(
                       "Following",
                       style: TextStyle(
                         fontWeight: FontWeight.normal,
@@ -197,24 +227,24 @@ class UserProfile extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                SizedBox(
+              children: [
+                const SizedBox(
                   width: double.infinity,
                   height: 10,
                 ),
                 Text(
-                  'mahdi_flutter',
-                  style: TextStyle(
+                  '${profile!.userName}',
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 Text(
-                  'This is a Mobile Developer with Flutter and Dart.i love programming ♥',
-                  style: TextStyle(
+                  '${profile!.userBio}',
+                  style: const TextStyle(
                     height: 1.5,
                     fontSize: 13,
                   ),
@@ -253,9 +283,9 @@ class UserProfile extends StatelessWidget {
               height: 10,
             ),
             SizedBox(
-              height: 115,
+              height: 80,
               child: ListView.builder(
-                itemCount: 3,
+                itemCount: 1,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
                   return const HistoryWidget();
@@ -283,12 +313,25 @@ class HistoryWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Image.asset('assets/images/profile.png'),
+          Container(
+            width: 55,
+            height: 55,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: const Color(0xffC7C7CC), width: 1),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.add,
+                size: 35,
+              ),
+            ),
+          ),
           const SizedBox(
             height: 10,
           ),
           const Text(
-            'Friends',
+            'New',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
