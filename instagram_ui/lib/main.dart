@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instagram_ui/bloc/explore/explore_bloc.dart';
 import 'package:instagram_ui/bloc/home/home_bloc.dart';
+import 'package:instagram_ui/bloc/profile/profile_bloc.dart';
 import 'package:instagram_ui/di/di.dart';
 import 'package:instagram_ui/screens/addpost_screen.dart';
 import 'package:instagram_ui/screens/explore_screen.dart';
@@ -9,6 +10,7 @@ import 'package:instagram_ui/screens/home_screen.dart';
 import 'package:instagram_ui/screens/login_screen.dart';
 import 'package:instagram_ui/screens/notifications_screen.dart';
 import 'package:instagram_ui/screens/profile_screen.dart';
+import 'package:instagram_ui/widgets/cachedimage_widget.dart';
 
 void main() async {
   await initioalGetIt();
@@ -69,22 +71,30 @@ class _MyAppState extends State<MyApp> {
               icon: SizedBox(
                 width: 30,
                 height: 30,
-                child: Image.asset(
-                  'assets/images/profile.png',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: const CachedImage(
+                    imgUrl:
+                        "https://blog.logrocket.com/wp-content/uploads/2021/08/handling-local-data-persistence-flutter-hive.png",
+                  ),
                 ),
               ),
               label: '',
               activeIcon: Container(
-                width: 33,
-                height: 33,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(30)),
                 child: Padding(
                   padding: const EdgeInsets.all(2),
-                  child: Image.asset(
-                    'assets/images/profile.png',
+                  child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: const CachedImage(
+                    imgUrl:
+                        "https://blog.logrocket.com/wp-content/uploads/2021/08/handling-local-data-persistence-flutter-hive.png",
                   ),
+                ),
                 ),
               ),
             ),
@@ -106,7 +116,10 @@ class _MyAppState extends State<MyApp> {
       ),
       const AddPostScreen(),
       const NotificationScreen(),
-      const ProfileScreen(),
+      BlocProvider(
+        create: (context) => ProfileBloc(),
+        child: const ProfileScreen(),
+      )
     ];
   }
 }
